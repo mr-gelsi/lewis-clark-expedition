@@ -1,0 +1,12 @@
+-- Optional: the app creates these tables automatically on first use.
+CREATE TABLE IF NOT EXISTS students (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  username TEXT NOT NULL UNIQUE COLLATE NOCASE,
+  partner TEXT DEFAULT '',
+  pass_hash TEXT NOT NULL, salt TEXT NOT NULL,
+  state TEXT, rev INTEGER DEFAULT 0,
+  level INTEGER DEFAULT 1, approval REAL DEFAULT 0, miles INTEGER DEFAULT 0, days INTEGER DEFAULT 0,
+  party INTEGER DEFAULT 2, money REAL DEFAULT 0, phase TEXT DEFAULT '', finished INTEGER DEFAULT 0,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP, updated_at TEXT DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE IF NOT EXISTS sessions (token TEXT PRIMARY KEY, role TEXT NOT NULL, student_id INTEGER, expires_at INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
