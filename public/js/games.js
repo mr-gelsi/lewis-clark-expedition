@@ -1,5 +1,5 @@
 // Interactive mini-games. Each returns a Promise with the result.
-import { S, esc, shuffle, rand, openModal, toast, clamp } from './core.js';
+import { S, esc, shuffle, rand, openModal, toast, clamp } from './core.js?v=5';
 
 // ---------- HUNT ----------
 // Hiding places (% of the picture) on each level's hunting background: rocks, bushes, trees and tall grass.
@@ -25,8 +25,8 @@ export function huntGame({ huntIndex, level = 1 }) {
       <div class="mg-stats">Shots left <b id="h-shots">${shots}</b> Ammunition <b id="h-ammo">${st.inv.ammo}</b> Food found <b id="h-food">0</b></div></div>
       <p>Something is rustling behind the rocks, bushes, trees and tall grass. Click a hiding place to take a shot. ${bonusShot ? 'Toussaint Charbonneau is with you: you get an extra shot and he turns your first miss into a hit.' : ''}</p>
       ${shots === 0 ? '<p class="err">You have no ammunition. You cannot hunt.</p>' : ''}
-      <div class="hunt-scene" id="field"><img src="/img/hunt/level${lv}.jpg" alt="Hunting grounds">
-        ${spots.map((s, i) => `<button class="spot" data-i="${i}" style="left:${s.x}%;top:${s.y}%" aria-label="Shoot at the ${s.k}" title="${s.k}"></button>`).join('')}</div>
+      <div class="hunt-scene" id="field" style="position:relative"><img style="display:block;width:100%" src="/img/hunt/level${lv}.jpg" alt="Hunting grounds">
+        ${spots.map((s, i) => `<button type="button" class="spot" data-i="${i}" style="position:absolute;left:${s.x}%;top:${s.y}%;width:7%;aspect-ratio:1;transform:translate(-50%,-50%);z-index:2" aria-label="Shoot at the ${s.k}" title="${s.k}"></button>`).join('')}</div>
       <p id="h-msg" class="muted" style="margin-top:.6rem"></p>
       <button class="btn moss big" id="h-done">${shots === 0 ? 'Go back' : 'Finish hunt'}</button></div>`);
     const upd = () => { m.el.querySelector('#h-shots').textContent = shots; m.el.querySelector('#h-ammo').textContent = st.inv.ammo; m.el.querySelector('#h-food').textContent = food; };
@@ -41,7 +41,7 @@ export function huntGame({ huntIndex, level = 1 }) {
       food += r; if (['deer', 'bear', 'bison'].includes(s.animal)) furs++;
     };
     m.el.querySelectorAll('.spot').forEach(b => b.addEventListener('click', () => {
-      if (shots <= 0) return;
+      if (shots <= 0) { m.el.querySelector('#h-msg').textContent = st.inv.ammo <= 0 ? 'You are out of ammunition.' : 'No shots left on this hunt. Click Finish hunt.'; return; }
       const i = Number(b.dataset.i); if (spots[i].shot) return;
       shots--; st.inv.ammo--;
       if (spots[i].animal) { reveal(i); m.el.querySelector('#h-msg').textContent = `Hit! You bagged a ${spots[i].animal} hiding by the ${spots[i].k}.`; }
@@ -52,7 +52,7 @@ export function huntGame({ huntIndex, level = 1 }) {
         else m.el.querySelector('#h-msg').textContent = `Nothing behind the ${spots[i].k}. The shot echoes across the land.`;
       }
       upd();
-      if (shots <= 0) m.el.querySelectorAll('.spot').forEach(x => x.disabled = true);
+      if (shots <= 0) { m.el.querySelectorAll('.spot').forEach(x => x.disabled = true); m.el.querySelector('#h-done').classList.add('river'); }
     }));
     m.el.querySelector('#h-done').addEventListener('click', () => { m.close(); resolve({ food, furs }); });
   });

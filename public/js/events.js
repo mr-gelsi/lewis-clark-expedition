@@ -1,6 +1,6 @@
 // Story moments, trail encounters and the helpers they use.
-import { S, G, scene, logScene, addPts, grantDiplomacy, lvl, save, toast, clamp, rand } from './core.js';
-import { surgeryGame, treeGame, rapidsGame, plantGame, tileGame, huntGame, forageGame } from './games.js';
+import { S, G, scene, logScene, addPts, grantDiplomacy, lvl, save, toast, clamp, rand } from './core.js?v=5';
+import { surgeryGame, treeGame, rapidsGame, plantGame, tileGame, huntGame, forageGame } from './games.js?v=5';
 
 export const PERISH_TEXT = 'Your expedition has failed, and your crew has become part of the uncharted wilderness.';
 

@@ -1,6 +1,6 @@
-import { S, G, esc, $, $$, api, save, approval, addPts, toast, openModal, closeAllModals, scene, logScene, clone, clamp, money, lvl, crew, outpostCfg, ANIMALS, LANDMARKS, DIPLOMACY, PT_KEYS } from './core.js';
-import { STORY, encounter, modeHazard, advanceDays, consumeDay, killMembers, speed, drain, doHunt, doForage, logLine, PERISH_TEXT, checkDays } from './events.js';
-import { quizGame } from './games.js';
+import { S, G, esc, $, $$, api, save, approval, addPts, toast, openModal, closeAllModals, scene, logScene, clone, clamp, money, lvl, crew, outpostCfg, ANIMALS, LANDMARKS, DIPLOMACY, PT_KEYS } from './core.js?v=5';
+import { STORY, encounter, modeHazard, advanceDays, consumeDay, killMembers, speed, drain, doHunt, doForage, logLine, PERISH_TEXT, checkDays } from './events.js?v=5';
+import { quizGame } from './games.js?v=5';
 
 const app = $('#app'), top = $('#topbar');
 
