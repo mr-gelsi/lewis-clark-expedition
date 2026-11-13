@@ -7,4 +7,4 @@ compatibility_date = "2024-09-23"
 [[d1_databases]]
 binding = "DB"
 database_name = "lewis-clark-db"
-database_id = "PASTE-YOUR-D1-DATABASE-ID-HERE"
+database_id = "2a5972da-920f-4745-9158-ae86ed44e120"
