@@ -147,7 +147,9 @@ label.field input, label.field select, label.field textarea, input.inp, select.i
 }
 .day-counter small { display: block; font-family: var(--body); font-size: .75rem; color: #d4bf94; }
 .route { padding: .8rem 1rem 1rem; background: var(--parchment); border-top: 3px solid var(--brass); }
+.route-track { position: relative; }
 .route svg { width: 100%; height: 70px; display: block; }
+.scene .route .travel-icon { position: absolute; height: 40px; width: auto; aspect-ratio: auto; object-fit: contain; transform: translate(-50%, -78%); pointer-events: none; filter: drop-shadow(0 3px 3px rgba(0,0,0,.35)); transition: left .3s linear, top .3s linear; }
 .route .rlabels { display: flex; justify-content: space-between; font-size: .85rem; color: var(--ink-soft); }
 .gauges { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; }
 .gauge { background: #fbf3df; border: 2px solid #9a6a3c; border-radius: var(--radius); padding: .5rem .7rem; }
@@ -192,17 +194,22 @@ label.field input, label.field select, label.field textarea, input.inp, select.i
 .mg-head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: .5rem; margin-bottom: .6rem; }
 .mg-stats { display: flex; gap: .8rem; flex-wrap: wrap; font-weight: 700; color: var(--ink-soft); }
 .mg-stats b { color: var(--ink); }
-.hunt-field {
-  display: grid; grid-template-columns: repeat(5, 1fr); gap: .5rem; padding: 1rem;
-  background: linear-gradient(180deg, #a9c3cf 0%, #c9d8c0 35%, #8aa063 36%, #6f8a4b 100%);
-  border: 5px solid var(--bark-dark); border-radius: 8px;
+.hunt-scene { position: relative; border: 5px solid var(--bark-dark); border-radius: 8px; overflow: hidden; container-type: inline-size; }
+.hunt-scene > img { display: block; width: 100%; aspect-ratio: 16/9; object-fit: cover; }
+.spot {
+  position: absolute; width: 7%; aspect-ratio: 1; transform: translate(-50%, -50%); padding: 0; cursor: crosshair;
+  border-radius: 50%; border: 3px dashed rgba(255, 248, 225, .85); background: rgba(255, 248, 225, .18);
+  box-shadow: 0 0 0 3px rgba(42, 28, 17, .35); animation: rustle 2.4s ease-in-out infinite;
 }
-.spot { position: relative; aspect-ratio: 1; border: none; background: transparent; cursor: crosshair; padding: 0; border-radius: 8px; }
-.spot svg { width: 100%; height: 100%; display: block; }
-.spot:hover:not(:disabled) { background: rgba(255,255,255,.15); }
-.spot .animal { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; animation: pop .35s ease-out; }
-.spot .tag { position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); background: rgba(42,28,17,.85); color: #fff; font-size: .75rem; padding: 0 .4rem; border-radius: 3px; white-space: nowrap; }
-.spot.miss::after { content: 'Miss'; position: absolute; top: 40%; left: 50%; transform: translate(-50%,-50%); color: #fff; background: rgba(143,47,30,.85); padding: .1rem .5rem; border-radius: 3px; font-weight: 700; }
+.spot:nth-child(odd) { animation-delay: -1.1s; }
+.spot:hover:not(:disabled) { background: rgba(184, 139, 61, .45); border-style: solid; }
+.spot:disabled { cursor: default; animation: none; }
+.spot.hit { border: none; background: transparent; box-shadow: none; width: 15%; }
+.spot .animal { position: absolute; left: 50%; bottom: 0; width: 100%; height: auto; transform: translateX(-50%); animation: pop .35s ease-out; filter: drop-shadow(0 4px 6px rgba(0,0,0,.45)); }
+.spot .tag { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); background: rgba(42,28,17,.88); color: #fff; font-size: clamp(10px, 1.4cqw, 14px); padding: 0 .4rem; border-radius: 3px; white-space: nowrap; }
+.spot.miss { border-color: rgba(143,47,30,.9); background: rgba(143,47,30,.25); box-shadow: none; }
+.spot.miss::after { content: 'Miss'; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); color: #fff; background: rgba(143,47,30,.9); padding: 0 .4rem; border-radius: 3px; font-weight: 700; font-size: clamp(10px, 1.4cqw, 14px); }
+@keyframes rustle { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.12); } }
 @keyframes pop { from { transform: scale(.3) translateY(30%); opacity: 0; } to { transform: none; opacity: 1; } }
 
 .cards { display: grid; gap: .5rem; grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); }
@@ -222,10 +229,11 @@ label.field input, label.field select, label.field textarea, input.inp, select.i
 .tile.badt { background: #e9b9a6; border-color: var(--danger); font-size: 1rem; }
 .tile.picked { outline: 4px solid var(--brass); }
 
-.trees { display: grid; grid-template-columns: repeat(5, 1fr); gap: .5rem; padding: 1rem; background: linear-gradient(180deg, #d9e2c8, #9db37a); border: 5px solid var(--bark-dark); border-radius: 8px; }
+.trees { display: grid; grid-template-columns: repeat(5, 1fr); gap: .5rem 1rem; padding: 1rem; background: linear-gradient(180deg, #e8eedb 0%, #cdd9b4 70%, #9db37a 100%); border: 5px solid var(--bark-dark); border-radius: 8px; }
 .tree { border: none; background: transparent; cursor: pointer; padding: 0; aspect-ratio: 3/4; position: relative; }
-.tree svg { width: 100%; height: 100%; }
-.tree.cut svg { opacity: .3; }
+.tree img { width: 100%; height: 100%; object-fit: contain; object-position: bottom; display: block; }
+.tree:hover:not(:disabled) img { transform: translateY(-3px); filter: brightness(1.08); }
+.tree.cut img { opacity: .3; }
 .tree .stamp { position: absolute; inset: auto 0 6px 0; text-align: center; font-weight: 700; font-size: .8rem; color: #fff; }
 .tree .stamp span { background: var(--ok); padding: 0 .4rem; border-radius: 3px; }
 .tree.sick .stamp span { background: var(--danger); }
@@ -272,7 +280,7 @@ table.tbl th { background: var(--bark); color: var(--parchment-light); font-weig
   .home-grid, .loc, .travel, .photo-scene, .surgery-wrap { grid-template-columns: 1fr; }
   .loc-img img { min-height: 0; aspect-ratio: 16/10; }
   h1 { font-size: 2rem; } .level-card h1 { font-size: 2.2rem; } .epic h1 { font-size: 2.3rem; }
-  .hunt-field, .tiles, .trees, .river-grid { grid-template-columns: repeat(5, 1fr); gap: .3rem; padding: .5rem; }
+  .tiles, .trees, .river-grid { grid-template-columns: repeat(5, 1fr); gap: .3rem; padding: .5rem; }
   .meter { width: 80px; }
 }
 @media (prefers-reduced-motion: reduce) {
