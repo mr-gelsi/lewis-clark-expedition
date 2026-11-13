@@ -197,19 +197,21 @@ label.field input, label.field select, label.field textarea, input.inp, select.i
 .hunt-scene { position: relative; border: 5px solid var(--bark-dark); border-radius: 8px; overflow: hidden; container-type: inline-size; }
 .hunt-scene > img { display: block; width: 100%; aspect-ratio: 16/9; object-fit: cover; }
 .spot {
-  position: absolute; width: 7%; aspect-ratio: 1; transform: translate(-50%, -50%); padding: 0; cursor: crosshair;
-  border-radius: 50%; border: 3px dashed rgba(255, 248, 225, .85); background: rgba(255, 248, 225, .18);
-  box-shadow: 0 0 0 3px rgba(42, 28, 17, .35); animation: rustle 2.4s ease-in-out infinite;
+  position: absolute; width: 7%; aspect-ratio: 1; transform: translate(-50%, -50%); padding: 0; cursor: crosshair; z-index: 2;
+  border-radius: 50%; border: 3px dashed rgba(255, 248, 225, .9); background: rgba(255, 248, 225, .2);
+  box-shadow: 0 0 0 3px rgba(42, 28, 17, .35); touch-action: manipulation;
 }
-.spot:nth-child(odd) { animation-delay: -1.1s; }
+.spot::before { content: ''; position: absolute; inset: -6px; border-radius: 50%; border: 2px solid rgba(255, 248, 225, .7); animation: rustle 2.4s ease-out infinite; pointer-events: none; }
+.spot:nth-child(odd)::before { animation-delay: -1.1s; }
 .spot:hover:not(:disabled) { background: rgba(184, 139, 61, .45); border-style: solid; }
-.spot:disabled { cursor: default; animation: none; }
+.spot:disabled { cursor: default; }
+.spot:disabled::before, .spot.hit::before, .spot.miss::before { display: none; }
 .spot.hit { border: none; background: transparent; box-shadow: none; width: 15%; }
 .spot .animal { position: absolute; left: 50%; bottom: 0; width: 100%; height: auto; transform: translateX(-50%); animation: pop .35s ease-out; filter: drop-shadow(0 4px 6px rgba(0,0,0,.45)); }
 .spot .tag { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); background: rgba(42,28,17,.88); color: #fff; font-size: clamp(10px, 1.4cqw, 14px); padding: 0 .4rem; border-radius: 3px; white-space: nowrap; }
 .spot.miss { border-color: rgba(143,47,30,.9); background: rgba(143,47,30,.25); box-shadow: none; }
 .spot.miss::after { content: 'Miss'; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); color: #fff; background: rgba(143,47,30,.9); padding: 0 .4rem; border-radius: 3px; font-weight: 700; font-size: clamp(10px, 1.4cqw, 14px); }
-@keyframes rustle { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.12); } }
+@keyframes rustle { 0% { transform: scale(.85); opacity: .9; } 100% { transform: scale(1.35); opacity: 0; } }
 @keyframes pop { from { transform: scale(.3) translateY(30%); opacity: 0; } to { transform: none; opacity: 1; } }
 
 .cards { display: grid; gap: .5rem; grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); }
