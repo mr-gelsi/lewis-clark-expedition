@@ -1,30 +1,21 @@
 // Interactive mini-games. Each returns a Promise with the result.
 import { S, esc, shuffle, rand, openModal, toast, clamp } from './core.js';
 
-// ---------- simple scenery drawings ----------
-const SCENERY = {
-  tree: `<svg viewBox="0 0 100 100"><rect x="45" y="62" width="10" height="30" fill="#5a3c26"/><path d="M50 8 L78 50 L64 50 L84 72 L16 72 L36 50 L22 50 Z" fill="#2f5a3a"/><path d="M50 8 L64 30 L36 30 Z" fill="#3e7149"/></svg>`,
-  bush: `<svg viewBox="0 0 100 100"><ellipse cx="50" cy="72" rx="40" ry="22" fill="#4e7a3a"/><ellipse cx="34" cy="62" rx="20" ry="18" fill="#5f8c45"/><ellipse cx="64" cy="60" rx="22" ry="19" fill="#5a8641"/><circle cx="40" cy="66" r="3" fill="#8f2f1e"/><circle cx="62" cy="70" r="3" fill="#8f2f1e"/></svg>`,
-  rock: `<svg viewBox="0 0 100 100"><path d="M12 88 L22 58 L40 46 L62 50 L80 62 L90 88 Z" fill="#7d7468"/><path d="M40 46 L62 50 L56 66 L30 70 Z" fill="#958b7d"/><rect x="8" y="86" width="86" height="6" fill="#5b6f3e"/></svg>`,
-  grass: `<svg viewBox="0 0 100 100"><g stroke="#c2b25a" stroke-width="4" stroke-linecap="round" fill="none"><path d="M20 92 Q22 60 14 40"/><path d="M32 92 Q34 56 40 34"/><path d="M46 92 Q44 50 50 26"/><path d="M58 92 Q60 58 68 38"/><path d="M72 92 Q74 64 84 48"/></g><g stroke="#8aa063" stroke-width="4" stroke-linecap="round" fill="none"><path d="M26 92 Q28 66 22 52"/><path d="M52 92 Q54 62 58 46"/><path d="M66 92 Q64 70 60 56"/></g></svg>`,
-  log: `<svg viewBox="0 0 100 100"><rect x="10" y="64" width="80" height="20" rx="10" fill="#6b4a2f"/><ellipse cx="88" cy="74" rx="6" ry="10" fill="#a07850"/><path d="M20 70 H70 M24 78 H80" stroke="#4a311e" stroke-width="2"/></svg>`
-};
-function treeSvg(sick) {
-  // diseased trees have pale fungus marks if you look closely
-  return `<svg viewBox="0 0 90 120"><rect x="40" y="78" width="10" height="38" fill="#5a3c26"/>
-    ${sick ? '<circle cx="44" cy="92" r="2.2" fill="#e6dcae"/><circle cx="47" cy="100" r="1.8" fill="#e6dcae"/><circle cx="43" cy="106" r="1.5" fill="#e6dcae"/>' : ''}
-    <path d="M45 6 L72 52 L60 52 L80 82 L10 82 L30 52 L18 52 Z" fill="${sick ? '#40633f' : '#2f5a3a'}"/>
-    <path d="M45 6 L58 30 L32 30 Z" fill="#3e7149"/></svg>`;
-}
-
 // ---------- HUNT ----------
+// Hiding places (% of the picture) on each level's hunting background: rocks, bushes, trees and tall grass.
+const HUNT_SPOTS = {
+  1: [[6, 40, 'rock'], [11, 54, 'rock'], [13, 74, 'rock'], [24, 64, 'rock'], [30, 36, 'big rock'], [42, 47, 'trees'], [72, 52, 'trees'], [91, 45, 'pine tree'], [46, 76, 'tall grass'], [78, 82, 'tall grass']],
+  2: [[5, 64, 'bush'], [12, 74, 'rock'], [27, 74, 'rock'], [36, 66, 'rock'], [22, 47, 'forest'], [24, 58, 'bush'], [88, 48, 'pine tree'], [76, 70, 'bushes'], [55, 85, 'tall grass'], [68, 91, 'rock']],
+  3: [[5, 50, 'rock'], [12, 48, 'rock'], [25, 52, 'rock'], [13, 73, 'rock'], [7, 86, 'rock'], [22, 62, 'bush'], [51, 61, 'bush'], [90, 50, 'pine tree'], [88, 73, 'bush'], [70, 86, 'tall grass']],
+  4: [[36, 40, 'rocks'], [5, 50, 'rock'], [8, 75, 'rocks'], [20, 62, 'bushes'], [78, 46, 'bush'], [92, 42, 'pine tree'], [48, 72, 'rocks'], [70, 58, 'rocks'], [55, 82, 'tall grass'], [86, 86, 'tall grass']]
+};
 const ANIMAL_POOL = ['bird', 'squirrel', 'squirrel', 'raccoon', 'raccoon', 'deer', 'deer', 'bear', 'bison'];
-export function huntGame({ huntIndex }) {
+export function huntGame({ huntIndex, level = 1 }) {
   return new Promise((resolve) => {
     const cfg = S.cfg.hunting, st = S.st;
+    const lv = HUNT_SPOTS[level] ? level : 1;
     const nAnimals = cfg.animalsByHunt[Math.min(huntIndex, cfg.animalsByHunt.length - 1)] ?? 1;
-    const kinds = ['tree', 'bush', 'rock', 'grass', 'tree', 'bush', 'rock', 'grass', 'log', 'tree'];
-    const spots = shuffle(kinds.map(k => ({ k, animal: null, shot: false })));
+    const spots = HUNT_SPOTS[lv].map(([x, y, k]) => ({ x, y, k, animal: null, shot: false }));
     shuffle([...spots.keys()]).slice(0, nAnimals).forEach(i => { spots[i].animal = ANIMAL_POOL[rand(ANIMAL_POOL.length)]; });
     const bonusShot = st.comp.charbonneau ? 1 : 0;
     let shots = Math.min(cfg.shots + bonusShot, st.inv.ammo);
@@ -32,9 +23,10 @@ export function huntGame({ huntIndex }) {
     const m = openModal(`<div class="frame">
       <div class="mg-head"><h2>Hunting for food</h2>
       <div class="mg-stats">Shots left <b id="h-shots">${shots}</b> Ammunition <b id="h-ammo">${st.inv.ammo}</b> Food found <b id="h-food">0</b></div></div>
-      <p>Animals may be hiding behind the trees, bushes, rocks and grass. Click a spot to take a shot. ${bonusShot ? 'Toussaint Charbonneau is with you: you get an extra shot and he turns your first miss into a hit.' : ''}</p>
+      <p>Something is rustling behind the rocks, bushes, trees and tall grass. Click a hiding place to take a shot. ${bonusShot ? 'Toussaint Charbonneau is with you: you get an extra shot and he turns your first miss into a hit.' : ''}</p>
       ${shots === 0 ? '<p class="err">You have no ammunition. You cannot hunt.</p>' : ''}
-      <div class="hunt-field" id="field">${spots.map((s, i) => `<button class="spot" data-i="${i}" aria-label="Shoot at the ${s.k}">${SCENERY[s.k]}</button>`).join('')}</div>
+      <div class="hunt-scene" id="field"><img src="/img/hunt/level${lv}.jpg" alt="Hunting grounds">
+        ${spots.map((s, i) => `<button class="spot" data-i="${i}" style="left:${s.x}%;top:${s.y}%" aria-label="Shoot at the ${s.k}" title="${s.k}"></button>`).join('')}</div>
       <p id="h-msg" class="muted" style="margin-top:.6rem"></p>
       <button class="btn moss big" id="h-done">${shots === 0 ? 'Go back' : 'Finish hunt'}</button></div>`);
     const upd = () => { m.el.querySelector('#h-shots').textContent = shots; m.el.querySelector('#h-ammo').textContent = st.inv.ammo; m.el.querySelector('#h-food').textContent = food; };
@@ -42,6 +34,8 @@ export function huntGame({ huntIndex }) {
       const s = spots[i]; s.shot = true;
       const btn = m.el.querySelector(`[data-i="${i}"]`);
       const r = cfg.rations[s.animal] || 1;
+      btn.classList.add('hit');
+      btn.style.width = ({ bison: 17, bear: 13, deer: 14, raccoon: 10, squirrel: 9, bird: 10 })[s.animal] + '%';
       btn.insertAdjacentHTML('beforeend', `<img class="animal" src="/img/animals/${s.animal}.png" alt="${s.animal}"><span class="tag">+${r} food</span>`);
       btn.disabled = true;
       food += r; if (['deer', 'bear', 'bison'].includes(s.animal)) furs++;
@@ -50,15 +44,15 @@ export function huntGame({ huntIndex }) {
       if (shots <= 0) return;
       const i = Number(b.dataset.i); if (spots[i].shot) return;
       shots--; st.inv.ammo--;
-      if (spots[i].animal) { reveal(i); m.el.querySelector('#h-msg').textContent = `Hit! You bagged a ${spots[i].animal}.`; }
+      if (spots[i].animal) { reveal(i); m.el.querySelector('#h-msg').textContent = `Hit! You bagged a ${spots[i].animal} hiding by the ${spots[i].k}.`; }
       else {
         spots[i].shot = true; b.classList.add('miss'); b.disabled = true;
         const left = spots.findIndex(s => s.animal && !s.shot);
         if (bonusShot && !converted && left >= 0) { converted = true; reveal(left); m.el.querySelector('#h-msg').textContent = `You missed, but Charbonneau spotted a ${spots[left].animal} and brought it down.`; }
-        else m.el.querySelector('#h-msg').textContent = 'Nothing there. The shot echoes across the land.';
+        else m.el.querySelector('#h-msg').textContent = `Nothing behind the ${spots[i].k}. The shot echoes across the land.`;
       }
       upd();
-      if (shots <= 0) { m.el.querySelectorAll('.spot').forEach(x => x.disabled = true); m.el.querySelector('#h-done').textContent = 'Finish hunt'; }
+      if (shots <= 0) m.el.querySelectorAll('.spot').forEach(x => x.disabled = true);
     }));
     m.el.querySelector('#h-done').addEventListener('click', () => { m.close(); resolve({ food, furs }); });
   });
@@ -174,11 +168,12 @@ export function surgeryGame() {
 export function treeGame({ fortName }) {
   return new Promise((resolve) => {
     const trees = shuffle([...Array(15)].map((_, i) => i < 3));
+    const pics = shuffle([...Array(15)].map((_, i) => 1 + (i % 11))); // diseased trees look exactly like healthy ones
     let safe = 0, sick = 0, done = false;
     const m = openModal(`<div class="frame"><div class="mg-head"><h2>Cut timber for ${esc(fortName)}</h2>
       <div class="mg-stats">Good logs <b id="t-safe">0</b>/8 Diseased trees cut <b id="t-sick">0</b>/3</div></div>
-      <p>Harvest 8 healthy trees. Three of these trees are diseased and rotten inside. Look closely at the trunks before you swing the axe. If you cut 3 diseased trees before you have 8 good logs, the delay costs you all of your early-finish bonus for this level.</p>
-      <div class="trees">${trees.map((s, i) => `<button class="tree" data-i="${i}" aria-label="Tree ${i + 1}">${treeSvg(s)}</button>`).join('')}</div>
+      <p>Harvest 8 healthy trees. Three of these trees are rotten inside, and there is no way to tell from the outside. Choose carefully. If you cut 3 diseased trees before you have 8 good logs, the delay costs you all of your early-finish bonus for this level.</p>
+      <div class="trees">${trees.map((s, i) => `<button class="tree" data-i="${i}" aria-label="Tree ${i + 1}"><img src="/img/trees/tree${pics[i]}.png" alt=""></button>`).join('')}</div>
       <p id="tr-msg" style="margin-top:.6rem"></p><button class="btn moss big hidden" id="tr-go">Build the fort</button></div>`);
     m.el.querySelectorAll('.tree').forEach(b => b.addEventListener('click', () => {
       if (done || b.classList.contains('cut')) return;

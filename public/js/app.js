@@ -532,10 +532,10 @@ function viewTravel(autostart = true) {
     <div>
       <div class="scene"><img src="/img/${L.travelImage}" alt="">
         <div class="day-counter"><small>Day</small><span id="tv-day">${r.days}</span> / ${r.maxDays}</div>
-        <div class="route"><svg viewBox="0 0 1000 70" preserveAspectRatio="none" aria-hidden="true">
+        <div class="route"><div class="route-track"><svg viewBox="0 0 1000 70" preserveAspectRatio="none" aria-hidden="true">
           <path d="M10 40 C120 10 200 62 320 38 S520 12 620 40 S820 64 990 30" fill="none" stroke="#2c5a74" stroke-width="6" stroke-linecap="round" opacity=".35"/>
           <path id="tv-path" d="M10 40 C120 10 200 62 320 38 S520 12 620 40 S820 64 990 30" fill="none" stroke="#2c5a74" stroke-width="6" stroke-linecap="round" stroke-dasharray="2000" stroke-dashoffset="2000"/>
-          <circle id="tv-dot" r="11" fill="#b88b3d" stroke="#37251a" stroke-width="3" cx="10" cy="40"/></svg>
+          </svg><img id="tv-icon" class="travel-icon" src="/img/travel/${r.mode}.png" alt="${esc(S.cfg.travel[r.mode].label)}"></div>
           <div class="rlabels"><span>${esc(L.start)}</span><span id="tv-miles"></span><span>Uncharted</span></div></div>
       </div>
       <h3 style="color:var(--parchment-light);margin-top:1rem">Trail log</h3>
@@ -579,7 +579,11 @@ function updateTravel() {
   if (path) {
     const len = path.getTotalLength();
     path.style.strokeDasharray = len; path.style.strokeDashoffset = len * (1 - frac);
-    const p = path.getPointAtLength(len * frac); $('#tv-dot').setAttribute('cx', p.x); $('#tv-dot').setAttribute('cy', p.y);
+    const p = path.getPointAtLength(len * frac);
+    const icon = $('#tv-icon');
+    icon.style.left = (p.x / 10) + '%'; icon.style.top = (p.y / 70 * 100) + '%';
+    const want = `/img/travel/${r.mode}.png`;
+    if (!icon.src.endsWith(want)) { icon.src = want; icon.alt = S.cfg.travel[r.mode].label; }
   }
   $('#tv-mode').textContent = `${S.cfg.travel[r.mode].label}: about ${speed()} miles a day.`;
   $('#g-en').textContent = Math.round(r.energy) + '%';

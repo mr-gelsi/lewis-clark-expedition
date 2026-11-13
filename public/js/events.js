@@ -66,7 +66,7 @@ export async function doHunt() {
     await scene({ title: 'No ammunition', text: st.run?.flags.betrayed ? 'Charbonneau took every last musket ball when he fled. You cannot hunt.' : 'You have no ammunition left. Buy more at an outpost or try foraging.', choices: [{ label: 'Back', value: 1 }] });
     return { food: 0 };
   }
-  const res = await huntGame({ huntIndex: r.hunts });
+  const res = await huntGame({ huntIndex: r.hunts, level: st.level });
   r.hunts++;
   st.inv.food += res.food; st.inv.fur = (st.inv.fur || 0) + res.furs;
   logLine(`Hunting party brought back ${res.food} food${res.furs ? ` and ${res.furs} fur${res.furs > 1 ? 's' : ''}` : ''}.`);
